@@ -169,10 +169,18 @@ export const useHabitStore = create<HabitState>((set, get) => ({
         },
       });
     } catch (err: any) {
-      // Revert on failure
-      set({ logs });
-      set({ error: 'Failed to update habit status' });
+      // If offline or network error, save to offlineQueue for background sync
+      if (typeof window !== 'undefined' && (!navigator.onLine || !err.response || err.code === 'ERR_NETWORK')) {
+        const { savePendingToggle } = await import('@/lib/offlineQueue');
+        savePendingToggle({ habitId, day, monthYear });
+        // Keep optimistic UI intact when offline
+      } else {
+        // Revert UI only if server explicitly rejected (e.g. 400 Bad Request)
+        set({ logs });
+        set({ error: 'Failed to update habit status' });
+      }
     }
+
   },
 
   clearError: () => set({ error: null }),

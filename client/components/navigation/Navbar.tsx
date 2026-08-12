@@ -7,10 +7,10 @@ import { useAuthStore } from "@/store/authStore";
 import {
   CalendarDays,
   LayoutGrid,
+  BarChart3,
   ShieldAlert,
   LogOut,
   User as UserIcon,
-  Flame,
 } from "lucide-react";
 
 export const Navbar = () => {
@@ -67,6 +67,17 @@ export const Navbar = () => {
               }`}
             >
               <LayoutGrid className="h-4 w-4" /> Command Center
+            </Link>
+
+            <Link
+              href="/stats"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                pathname === "/stats"
+                  ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <BarChart3 className="h-4 w-4 text-emerald-400" /> Analytics Stats
             </Link>
 
             {isAdmin && (
@@ -131,6 +142,16 @@ export const Navbar = () => {
         >
           <LayoutGrid className="h-5 w-5" />
           <span>Overview</span>
+        </Link>
+
+        <Link
+          href="/stats"
+          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition ${
+            pathname === "/stats" ? "text-emerald-400" : "text-slate-400"
+          }`}
+        >
+          <BarChart3 className="h-5 w-5" />
+          <span>Stats</span>
         </Link>
 
         {isAdmin && (
