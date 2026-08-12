@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument, UserRole } from '../auth/schemas/user.schema';
@@ -13,8 +13,12 @@ export class AdminService {
     return this.userModel.find().select('-password').sort({ createdAt: -1 });
   }
 
-  async toggleUserStatus(userId: string) {
-    const user = await this.userModel.findById(userId);
+  async toggleUserStatus(targetUserId: string, currentAdminId?: string) {
+    if (currentAdminId && targetUserId === currentAdminId) {
+      throw new BadRequestException('Admins cannot deactivate their own account to prevent system lockouts');
+    }
+
+    const user = await this.userModel.findById(targetUserId);
     if (!user) {
       throw new NotFoundException('User not found');
     }

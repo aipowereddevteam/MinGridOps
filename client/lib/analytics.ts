@@ -32,39 +32,74 @@ export interface TopHabitPoint {
 }
 
 /**
+ * Calculates start day for a habit in a target month (1-indexed day).
+ * Handles habits created mid-month or in previous/future months.
+ */
+export function getHabitStartDayInMonth(habit: Habit, monthYearStr: string): number {
+  if (!habit.createdAt) return 1;
+
+  try {
+    const createdDate = new Date(habit.createdAt);
+    const createdYear = createdDate.getFullYear();
+    const createdMonth = createdDate.getMonth() + 1; // 1-indexed
+
+    const [targetYearStr, targetMonthStr] = monthYearStr.split('-');
+    const targetYear = parseInt(targetYearStr, 10);
+    const targetMonth = parseInt(targetMonthStr, 10);
+
+    if (createdYear < targetYear || (createdYear === targetYear && createdMonth < targetMonth)) {
+      return 1; // Created in past month -> active from Day 1
+    }
+
+    if (createdYear === targetYear && createdMonth === targetMonth) {
+      return createdDate.getDate(); // Created this month -> active from created day
+    }
+
+    return 32; // Created in future month -> 0 active days
+  } catch (e) {
+    return 1;
+  }
+}
+
+/**
  * Calculates daily completed vs open habits for each day of the month
  */
 export function calculateDailyCompletionData(
   habits: Habit[],
   logs: Record<string, HabitLog>,
-  daysInMonth: number
+  daysInMonth: number,
+  monthYearStr: string = new Date().toISOString().slice(0, 7)
 ): DailyCompletionPoint[] {
-  const totalHabits = habits.length;
-  if (totalHabits === 0) return [];
+  if (habits.length === 0) return [];
 
   const data: DailyCompletionPoint[] = [];
 
   for (let day = 1; day <= daysInMonth; day++) {
     const index = day - 1;
     let completedCount = 0;
+    let activeHabitsCount = 0;
 
     habits.forEach((h) => {
-      const log = logs[h._id];
-      const str = log?.completionString || DEFAULT_31_ZERO_BITS;
-      if (str[index] === '1') {
-        completedCount++;
+      const startDay = getHabitStartDayInMonth(h, monthYearStr);
+      if (day >= startDay) {
+        activeHabitsCount++;
+        const log = logs[h._id];
+        const str = log?.completionString || DEFAULT_31_ZERO_BITS;
+        if (str[index] === '1') {
+          completedCount++;
+        }
       }
     });
 
-    const openCount = totalHabits - completedCount;
-    const rate = Math.round((completedCount / totalHabits) * 100);
+    const openCount = Math.max(0, activeHabitsCount - completedCount);
+    const rate = activeHabitsCount > 0 ? Math.round((completedCount / activeHabitsCount) * 100) : 0;
 
     data.push({
       dayNumber: day,
       dayLabel: `Day ${day}`,
       completed: completedCount,
       open: openCount,
-      total: totalHabits,
+      total: activeHabitsCount,
       rate,
     });
   }
@@ -73,34 +108,50 @@ export function calculateDailyCompletionData(
 }
 
 /**
- * Calculates total Done vs Open habits ratio for pie/donut chart
+ * Calculates total Done vs Open habits ratio for pie/donut chart and summary metrics
+ * Takes habit creation dates into account so mid-month habits are NOT penalized for prior days!
  */
 export function calculateDoneVsOpenData(
   habits: Habit[],
   logs: Record<string, HabitLog>,
-  daysInMonth: number
+  daysInMonth: number,
+  monthYearStr: string = new Date().toISOString().slice(0, 7)
 ): DoneVsOpenPoint[] {
-  const totalPossible = habits.length * daysInMonth;
-  if (totalPossible === 0) {
-    return [
-      { name: 'Completed', value: 0, color: '#10b981' },
-      { name: 'Pending', value: 1, color: '#1e293b' },
-    ];
+  const now = new Date();
+  const currentMonthStr = now.toISOString().slice(0, 7);
+
+  // If active month is current month, evaluate up to today's date
+  let maxDayToEvaluate = daysInMonth;
+  if (monthYearStr === currentMonthStr) {
+    maxDayToEvaluate = now.getDate();
   }
 
+  let totalActiveOpportunities = 0;
   let totalCompleted = 0;
 
   habits.forEach((h) => {
+    const startDay = getHabitStartDayInMonth(h, monthYearStr);
     const log = logs[h._id];
     const str = log?.completionString || DEFAULT_31_ZERO_BITS;
-    for (let i = 0; i < daysInMonth; i++) {
-      if (str[i] === '1') {
-        totalCompleted++;
+
+    for (let day = startDay; day <= maxDayToEvaluate; day++) {
+      if (day <= daysInMonth) {
+        totalActiveOpportunities++;
+        if (str[day - 1] === '1') {
+          totalCompleted++;
+        }
       }
     }
   });
 
-  const totalOpen = totalPossible - totalCompleted;
+  if (totalActiveOpportunities === 0) {
+    return [
+      { name: 'Completed', value: 0, color: '#10b981' },
+      { name: 'Open / Pending', value: 1, color: '#1e293b' },
+    ];
+  }
+
+  const totalOpen = Math.max(0, totalActiveOpportunities - totalCompleted);
 
   return [
     { name: 'Completed', value: totalCompleted, color: '#10b981' },
@@ -114,9 +165,10 @@ export function calculateDoneVsOpenData(
 export function calculateWeeklyTrendData(
   habits: Habit[],
   logs: Record<string, HabitLog>,
-  daysInMonth: number
+  daysInMonth: number,
+  monthYearStr: string = new Date().toISOString().slice(0, 7)
 ): WeeklyTrendPoint[] {
-  const dailyData = calculateDailyCompletionData(habits, logs, daysInMonth);
+  const dailyData = calculateDailyCompletionData(habits, logs, daysInMonth, monthYearStr);
   if (dailyData.length === 0) return [];
 
   const weeks = [
@@ -150,22 +202,36 @@ export function calculateWeeklyTrendData(
 export function calculateTopHabitsData(
   habits: Habit[],
   logs: Record<string, HabitLog>,
-  daysInMonth: number
+  daysInMonth: number,
+  monthYearStr: string = new Date().toISOString().slice(0, 7)
 ): TopHabitPoint[] {
   if (habits.length === 0) return [];
 
+  const now = new Date();
+  const currentMonthStr = now.toISOString().slice(0, 7);
+  let maxDayToEvaluate = daysInMonth;
+  if (monthYearStr === currentMonthStr) {
+    maxDayToEvaluate = now.getDate();
+  }
+
   const habitsWithStats = habits.map((h) => {
+    const startDay = getHabitStartDayInMonth(h, monthYearStr);
     const log = logs[h._id];
     const str = log?.completionString || DEFAULT_31_ZERO_BITS;
+
+    let activeDaysCount = 0;
     let completedCount = 0;
 
-    for (let i = 0; i < daysInMonth; i++) {
-      if (str[i] === '1') {
-        completedCount++;
+    for (let day = startDay; day <= maxDayToEvaluate; day++) {
+      if (day <= daysInMonth) {
+        activeDaysCount++;
+        if (str[day - 1] === '1') {
+          completedCount++;
+        }
       }
     }
 
-    const completionRate = Math.round((completedCount / daysInMonth) * 100);
+    const completionRate = activeDaysCount > 0 ? Math.round((completedCount / activeDaysCount) * 100) : 0;
 
     return {
       name: h.title,

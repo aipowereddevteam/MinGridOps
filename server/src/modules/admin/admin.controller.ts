@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRole } from '../auth/schemas/user.schema';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('admin')
 @UseGuards(RolesGuard)
@@ -16,8 +17,9 @@ export class AdminController {
   }
 
   @Patch('users/:id/toggle-status')
-  async toggleUserStatus(@Param('id') id: string) {
-    return this.adminService.toggleUserStatus(id);
+  async toggleUserStatus(@Param('id') id: string, @CurrentUser() user: any) {
+    const adminId = user?._id?.toString() || user?.id || user?.sub;
+    return this.adminService.toggleUserStatus(id, adminId);
   }
 
   @Patch('users/:id/make-admin')

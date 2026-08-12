@@ -7,8 +7,10 @@
     "client"
   ],
   "scripts": {
-    "dev:backend": "npm run start:dev --workspace=server",
+    "dev:backend": "npm run dev --workspace=server",
     "dev:frontend": "npm run dev --workspace=client",
+    "dev": "npm run dev:backend",
+
     "build:backend": "npm run build --workspace=server",
     "build:frontend": "npm run build --workspace=client",
     "build": "npm run build:backend && npm run build:frontend",

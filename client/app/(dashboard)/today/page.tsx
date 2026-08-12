@@ -8,6 +8,7 @@ import {
 } from "@/store/habitStore";
 import { StreakBadge } from "@/components/gamification/StreakBadge";
 import { DailyProgressRing } from "@/components/gamification/DailyProgressRing";
+import { MotivatingStatsCard } from "@/components/gamification/MotivatingStatsCard";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -63,6 +64,8 @@ export default function TodayPage() {
     }
   });
 
+  const openTodayCount = Math.max(0, habits.length - completedTodayCount);
+
   const handleAddSuggested = async (suggested: typeof SUGGESTED_HABITS[0]) => {
     await createHabit({
       title: suggested.title,
@@ -107,6 +110,15 @@ export default function TodayPage() {
           >
             <Plus className="h-4 w-4" /> Add Custom Habit
           </motion.button>
+        </div>
+
+        {/* Motivating Stats Widgets (Done vs Open & Sparkline Curve) */}
+        <div className="mt-6">
+          <MotivatingStatsCard
+            completedCount={completedTodayCount}
+            totalCount={habits.length}
+            openCount={openTodayCount}
+          />
         </div>
 
         {/* Gamification Telemetry Bar */}

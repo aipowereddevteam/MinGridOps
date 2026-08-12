@@ -78,7 +78,7 @@ describe('Habit Logs Bit-Packing Engine (e2e)', () => {
         .send({
           habitId: userAHabitId,
           day: 1,
-          monthYear: '2026-08',
+          monthYear: '2026-02',
         })
         .expect(200);
 
@@ -95,7 +95,7 @@ describe('Habit Logs Bit-Packing Engine (e2e)', () => {
         .send({
           habitId: userAHabitId,
           day: 15,
-          monthYear: '2026-08',
+          monthYear: '2026-02',
         });
 
       // Second toggle: 1 -> 0
@@ -105,7 +105,7 @@ describe('Habit Logs Bit-Packing Engine (e2e)', () => {
         .send({
           habitId: userAHabitId,
           day: 15,
-          monthYear: '2026-08',
+          monthYear: '2026-02',
         })
         .expect(200);
 
@@ -133,7 +133,19 @@ describe('Habit Logs Bit-Packing Engine (e2e)', () => {
         .send({
           habitId: userAHabitId,
           day: 35,
-          monthYear: '2026-08',
+          monthYear: '2026-02',
+        })
+        .expect(400);
+    });
+
+    it('should reject future date toggle attempts (400 Bad Request)', async () => {
+      await request(app.getHttpServer())
+        .patch('/api/habit-logs/toggle')
+        .set('Cookie', userACookie)
+        .send({
+          habitId: userAHabitId,
+          day: 28,
+          monthYear: '2099-12',
         })
         .expect(400);
     });
@@ -155,7 +167,7 @@ describe('Habit Logs Bit-Packing Engine (e2e)', () => {
         .send({
           habitId: userAHabitId,
           day: 1,
-          monthYear: '2026-08',
+          monthYear: '2026-02',
         })
         .expect(404);
     });

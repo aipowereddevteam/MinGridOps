@@ -34,6 +34,19 @@ export class HabitLogsService {
       throw new BadRequestException('Day must be between 1 and 31');
     }
 
+    // Future date prevention guard
+    const now = new Date();
+    const currentMonthStr = now.toISOString().slice(0, 7);
+    const currentDayNumber = now.getDate();
+
+    if (monthYear > currentMonthStr) {
+      throw new BadRequestException('Cannot check off habits for future months');
+    }
+
+    if (monthYear === currentMonthStr && day > currentDayNumber) {
+      throw new BadRequestException('Cannot check off habits for future dates');
+    }
+
     const index = day - 1;
 
     // Find existing habit log or initialize new
@@ -60,7 +73,7 @@ export class HabitLogsService {
     const updatedLog = await this.habitLogModel.findOneAndUpdate(
       { userId: userObjId, habitId: habitObjId, monthYear } as any,
       { completionString: newCompletionString },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
     );
 
     return updatedLog;
