@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongo:
+    image: mongo:latest
+    container_name: mingrid-mongo
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mingrid-network
+
+  # Nest.js Enterprise Backend Service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mingrid-server
+    restart: always
+    ports:
+      - '5000:5000'
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/mingrid
+      - JWT_SECRET=super_secret_mingrid_enterprise_key_2026_docker_prod
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:3000
+      - THROTTLE_TTL=60000
+      - THROTTLE_LIMIT=100
+    depends_on:
+      - mongo
+    networks:
+      - mingrid-network
+
+  # Next.js 16 PWA Frontend Service
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    container_name: mingrid-client
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      - PORT=3000
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+      - NODE_ENV=production
+    depends_on:
+      - server
+    networks:
+      - mingrid-network
+
+networks:
+  mingrid-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
