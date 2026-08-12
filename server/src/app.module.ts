@@ -21,9 +21,15 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI') || 'mongodb://localhost:27017/mingrid',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>('MONGO_URI');
+        if (!uri) {
+          console.warn('⚠️ [Config] MONGO_URI environment variable is missing! Falling back to localhost.');
+        }
+        return {
+          uri: uri || 'mongodb://localhost:27017/mingrid',
+        };
+      },
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],

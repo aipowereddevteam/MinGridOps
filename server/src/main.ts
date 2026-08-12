@@ -36,8 +36,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT ?? 5000;
-  await app.listen(port);
-  console.log(`🚀 Mingrid Enterprise Backend running on: http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Mingrid Enterprise Backend running on port ${port}`);
 }
 bootstrap();
 
