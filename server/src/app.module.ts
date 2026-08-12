@@ -16,7 +16,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', 'server/.env'],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
