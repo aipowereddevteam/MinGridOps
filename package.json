@@ -1,0 +1,16 @@
+{
+  "name": "mingrid-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "mingrid-backend",
+    "mingrid-frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run start:dev --workspace=mingrid-backend",
+    "dev:frontend": "npm run dev --workspace=mingrid-frontend",
+    "build:backend": "npm run build --workspace=mingrid-backend",
+    "build:frontend": "npm run build --workspace=mingrid-frontend",
+    "build": "npm run build:backend && npm run build:frontend"
+  }
+}

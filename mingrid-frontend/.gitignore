@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Next.js Build Output
+.next/
+out/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Service Worker & PWA Build Artifacts
+public/sw.js
+public/workbox-*.js
+public/sw.js.map
+public/workbox-*.js.map
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
