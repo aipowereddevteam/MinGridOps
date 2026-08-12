@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { HabitsModule } from './modules/habits/habits.module';
 import { HabitLogsModule } from './modules/habit-logs/habit-logs.module';
+import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -38,6 +39,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     AdminModule,
     HabitsModule,
     HabitLogsModule,
+    LeaderboardModule,
   ],
   controllers: [AppController],
   providers: [
@@ -53,6 +55,3 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
   ],
 })
 export class AppModule {}
-
-
-

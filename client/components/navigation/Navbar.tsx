@@ -8,6 +8,7 @@ import {
   CalendarDays,
   LayoutGrid,
   BarChart3,
+  Trophy,
   ShieldAlert,
   LogOut,
   User as UserIcon,
@@ -80,13 +81,24 @@ export const Navbar = () => {
               <BarChart3 className="h-4 w-4 text-emerald-400" /> Analytics Stats
             </Link>
 
+            <Link
+              href="/leaderboard"
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                pathname === "/leaderboard"
+                  ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Trophy className="h-4 w-4 text-amber-400" /> Leaderboard
+            </Link>
+
             {isAdmin && (
               <Link
                 href="/admin"
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
                   pathname === "/admin"
-                    ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                    : "text-amber-400/80 hover:text-amber-300"
+                    ? "bg-rose-500/15 text-rose-300 border border-rose-500/30"
+                    : "text-rose-400/80 hover:text-rose-300"
                 }`}
               >
                 <ShieldAlert className="h-4 w-4" /> Admin Console
@@ -123,11 +135,11 @@ export const Navbar = () => {
       </header>
 
       {/* Mobile Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/10 bg-[#090d16]/90 backdrop-blur-lg px-4 py-2.5 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/10 bg-[#090d16]/90 backdrop-blur-lg px-2 py-2 md:hidden">
         <Link
           href="/today"
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition ${
-            pathname === "/today" ? "text-indigo-400" : "text-slate-400"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-medium transition ${
+            pathname === "/today" ? "text-indigo-400 font-bold" : "text-slate-400"
           }`}
         >
           <CalendarDays className="h-5 w-5" />
@@ -136,8 +148,8 @@ export const Navbar = () => {
 
         <Link
           href="/overview"
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition ${
-            pathname === "/overview" ? "text-indigo-400" : "text-slate-400"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-medium transition ${
+            pathname === "/overview" ? "text-indigo-400 font-bold" : "text-slate-400"
           }`}
         >
           <LayoutGrid className="h-5 w-5" />
@@ -146,19 +158,29 @@ export const Navbar = () => {
 
         <Link
           href="/stats"
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition ${
-            pathname === "/stats" ? "text-emerald-400" : "text-slate-400"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-medium transition ${
+            pathname === "/stats" ? "text-emerald-400 font-bold" : "text-slate-400"
           }`}
         >
           <BarChart3 className="h-5 w-5" />
           <span>Stats</span>
         </Link>
 
+        <Link
+          href="/leaderboard"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-medium transition ${
+            pathname === "/leaderboard" ? "text-amber-400 font-bold" : "text-slate-400"
+          }`}
+        >
+          <Trophy className="h-5 w-5 text-amber-400" />
+          <span>Ranks</span>
+        </Link>
+
         {isAdmin && (
           <Link
             href="/admin"
-            className={`flex flex-col items-center gap-1 text-[11px] font-medium transition ${
-              pathname === "/admin" ? "text-amber-400" : "text-slate-400"
+            className={`flex flex-col items-center gap-0.5 text-[10px] font-medium transition ${
+              pathname === "/admin" ? "text-rose-400 font-bold" : "text-slate-400"
             }`}
           >
             <ShieldAlert className="h-5 w-5" />

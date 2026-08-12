@@ -147,7 +147,7 @@ export default function Home() {
               </div>
               <h3 className="mt-6 text-xl font-bold text-white">Mobile PWA & Swipe Gestures</h3>
               <p className="mt-2 text-sm text-slate-400">
-                Touch-optimized experience for daily routines like Deep Work, No Porn, and Time with God with offline sync.
+                Touch-optimized experience for daily routines like Deep Work, and Time with God with offline sync.
               </p>
             </motion.div>
           </div>
@@ -164,7 +164,7 @@ export default function Home() {
                 Pre-configured Enterprise Routines
               </h2>
               <p className="mt-2 text-sm text-slate-400 max-w-lg">
-                Includes specialized daily focus cards: Deep Work, No Porn, No Alcohol, and Time with God.
+                Includes specialized daily focus cards: Deep Work, No Alcohol, and Time with God.
               </p>
             </div>
             <Link

@@ -25,7 +25,7 @@ import {
 const SUGGESTED_HABITS = [
   { title: "Deep Work (2 Hours)", icon: "Zap", color: "#6366f1" },
   { title: "No Alcohol", icon: "Shield", color: "#10b981" },
-  { title: "No Porn / Retention", icon: "Flame", color: "#f43f5e" },
+  { title: "No Retention", icon: "Flame", color: "#f43f5e" },
   { title: "Time with God & Prayer", icon: "Heart", color: "#8b5cf6" },
   { title: "Read 10 Pages", icon: "BookOpen", color: "#f59e0b" },
 ];
