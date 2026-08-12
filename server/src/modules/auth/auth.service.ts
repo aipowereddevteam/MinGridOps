@@ -8,17 +8,26 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { Response } from 'express';
+import { OAuth2Client } from 'google-auth-library';
 import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 
 @Injectable()
 export class AuthService {
+  private googleOAuthClient: OAuth2Client;
+
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    this.googleOAuthClient = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID || 'dummy_client_id',
+    );
+  }
 
   private setAuthCookie(res: Response, token: string) {
     const isProduction = process.env.NODE_ENV === 'production';
@@ -72,6 +81,7 @@ export class AuthService {
         name: newUser.name,
         email: newUser.email,
         avatar: newUser.avatar,
+        role: newUser.role,
       },
     };
   }
@@ -82,6 +92,10 @@ export class AuthService {
     const user = await this.userModel.findOne({ email: email.toLowerCase() });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated. Contact Administrator.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -103,6 +117,69 @@ export class AuthService {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        role: user.role,
+      },
+    };
+  }
+
+  async googleAuth(googleAuthDto: GoogleAuthDto, res: Response) {
+    const { idToken } = googleAuthDto;
+    let payload: any;
+
+    try {
+      const ticket = await this.googleOAuthClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Google ID token');
+    }
+
+    if (!payload || !payload.email) {
+      throw new UnauthorizedException('Google authentication failed: Email missing from payload');
+    }
+
+    const { email, name, picture } = payload;
+    const normalizedEmail = email.toLowerCase();
+
+    let user = await this.userModel.findOne({ email: normalizedEmail });
+
+    if (user) {
+      if (!user.isActive) {
+        throw new UnauthorizedException('Account is deactivated. Contact Administrator.');
+      }
+      if (!user.avatar && picture) {
+        user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // Create Google user
+      const randomPassword = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+      user = await this.userModel.create({
+        name: name || 'Google User',
+        email: normalizedEmail,
+        password: randomPassword,
+        avatar: picture || '',
+        isGoogleUser: true,
+      });
+    }
+
+    const token = this.jwtService.sign({
+      sub: user._id.toString(),
+      email: user.email,
+    });
+
+    this.setAuthCookie(res, token);
+
+    return {
+      message: 'Google authentication successful',
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
       },
     };
   }
@@ -118,6 +195,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      role: user.role,
     };
   }
 }

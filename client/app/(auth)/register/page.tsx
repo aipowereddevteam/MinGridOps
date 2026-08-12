@@ -9,6 +9,7 @@ import * as z from "zod";
 import { motion } from "framer-motion";
 import { User, Lock, Mail, ArrowRight, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 
 const registerSchema = z
   .object({
@@ -44,7 +45,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       });
-      router.push("/dashboard");
+      router.push("/today");
     } catch (e) {
       // Error handled by store
     }
@@ -80,15 +81,28 @@ export default function RegisterPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 flex items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-300"
+            className="mt-4 flex items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-300"
           >
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
             <span>{error}</span>
           </motion.div>
         )}
 
+        {/* Google OAuth Section */}
+        <div className="mt-6">
+          <GoogleAuthButton onSuccessRedirect="/today" />
+        </div>
+
+        {/* Divider */}
+        <div className="relative my-5 flex items-center justify-center">
+          <div className="w-full border-t border-white/10" />
+          <span className="absolute bg-[#0f172a] px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            OR CONTINUE WITH EMAIL
+          </span>
+        </div>
+
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
               Full Name

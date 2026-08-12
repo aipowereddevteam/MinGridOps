@@ -10,7 +10,6 @@ export interface User {
   avatar?: string;
 }
 
-
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -20,6 +19,7 @@ interface AuthState {
 
   registerUser: (data: { name: string; email: string; password: string }) => Promise<void>;
   loginUser: (data: { email: string; password: string }) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logoutUser: () => Promise<void>;
   checkAuth: () => Promise<void>;
   clearError: () => void;
@@ -52,6 +52,18 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user, isAuthenticated: true, isLoading: false, error: null });
     } catch (err: any) {
       set({ isLoading: false, error: err.message || 'Login failed' });
+      throw err;
+    }
+  },
+
+  loginWithGoogle: async (idToken: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post('/auth/google', { idToken });
+      const user = response.data.user;
+      set({ user, isAuthenticated: true, isLoading: false, error: null });
+    } catch (err: any) {
+      set({ isLoading: false, error: err.message || 'Google authentication failed' });
       throw err;
     }
   },

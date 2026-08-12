@@ -2,7 +2,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Stage 2: Build Application
 FROM node:20-alpine AS builder
@@ -19,7 +19,7 @@ ENV NODE_ENV=production
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
 # Copy compiled dist from builder
 COPY --from=builder --chown=node:node /app/dist ./dist

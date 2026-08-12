@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database Service
   mongo:
@@ -30,6 +28,7 @@ services:
       - FRONTEND_URL=http://localhost:3000
       - THROTTLE_TTL=60000
       - THROTTLE_LIMIT=100
+      - GOOGLE_CLIENT_ID=845607062458-1b2jorf4v8uojvfuu5rb7srhdiaa24bg.apps.googleusercontent.com
     depends_on:
       - mongo
     networks:
@@ -42,6 +41,7 @@ services:
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+        - NEXT_PUBLIC_GOOGLE_CLIENT_ID=845607062458-1b2jorf4v8uojvfuu5rb7srhdiaa24bg.apps.googleusercontent.com
     container_name: mingrid-client
     restart: always
     ports:
@@ -49,6 +49,7 @@ services:
     environment:
       - PORT=3000
       - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=845607062458-1b2jorf4v8uojvfuu5rb7srhdiaa24bg.apps.googleusercontent.com
       - NODE_ENV=production
     depends_on:
       - server

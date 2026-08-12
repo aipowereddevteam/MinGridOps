@@ -2,7 +2,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Stage 2: Build Application
 FROM node:20-alpine AS builder
@@ -10,9 +10,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build argument for Next.js API URL
+# Build arguments for Next.js API URL and Google Client ID
 ARG NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID=845607062458-1b2jorf4v8uojvfuu5rb7srhdiaa24bg.apps.googleusercontent.com
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
 
 RUN npm run build
 
